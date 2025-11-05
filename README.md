@@ -1,66 +1,54 @@
-# Material Property Prediction (Tensile Strength ML Project)
---------------------------------------------------------------
+# Material Property Prediction Models
 
-Overview
---------------------------------------------------------------
-This project predicts Tensile Strength (MPa) of composite materials based on various physical and chemical features using a Random Forest Regression model.
-The script:
+This project builds and compares multiple machine learning models to predict the **Tensile Strength (MPa)** of composite materials based on input formulation and material properties.
 
-1. Loads your dataset (data.csv)
-2. Preprocesses and scales features
-3. Trains a Random Forest model
-4. Evaluates performance (MAE, RMSE, R²)
-5. Displays feature importance
-6. Optionally saves the trained model as 'tensile_strength_model.pkl'
+## Input Data
+Your dataset must be stored in an Excel file named:
+```
+X_bp.xlsx
+```
+Required columns:
+- Matrix-to-filler Ratio
+- Density, kg/m^3
+- Elastic Modulus, Gpa
+- Harderner content, wt.%
+- Epoxy group content, %
+- Flash point, C
+- Surface Density, g/m^3
+- Tensile modulus, Gpa
+- Tensile Strength, Mpa  ← Target variable
+- Resin Consumption, g/m^2
 
---------------------------------------------------------------
-Dataset Format
---------------------------------------------------------------
-Your dataset (data.csv) must include the following columns:
+## Model Comparison
+The script trains and compares the following models:
+- Linear Regression
+- Support Vector Regressor (SVR)
+- Random Forest Regressor
+- XGBoost Regressor
 
-| Column Name | Description |
-|------------|-------------|
-| **Matrix-to-filler ratio** | Ratio of matrix material to filler |
-| **Density, kg/m^3** | Material density |
-| **Elastic modulus, GPa** | Elastic modulus |
-| **Harderner content, wt.%** | Harderner content by weight |
-| **Epoxy group content, %** | Epoxy group percentage |
-| **Flash point, in Celcius** | Flash point temperature |
-| **Surface Density, g/m^3** | Surface density |
-| **Tensile modulus, GPa** | Tensile modulus |
-| **Tensile strength, MPa** | (Target column), strength to predict |
-| **Resin consumption, g/m^2** | Resin consumption |
+Each model is evaluated using:
+- Mean Absolute Error (MAE)
+- Root Mean Squared Error (RMSE)
+- R² Score
 
+## Best Model Saving
+The model with the highest R² performance is automatically saved as:
+```
+best_model_<modelname>.pkl
+```
 
-Save the file as data.csv in the same directory as the script.
+## Feature Importance
+Feature importance visualization is generated using the Random Forest model.
 
---------------------------------------------------------------
-How to Run
---------------------------------------------------------------
+## Installation
+Install required packages:
+```
+pip install pandas numpy scikit-learn xgboost matplotlib seaborn joblib openpyxl
+```
 
-1. Install required Python packages: 
-   pip install pandas numpy scikit-learn matplotlib seaborn joblib 
-2. Place your dataset file (data.csv) in the same folder. 
-3. Run the script:
-   python material_strength_prediction.py
-
-The script will:
-* Display training progress and results
-* Show a feature importance plot
-* Save the model as tensile_strength_model.pkl
-
---------------------------------------------------------------
-Outputs
---------------------------------------------------------------
-
-* Metrics printed: MAE, RMSE, R²
-* Feature importance bar chart
-* Saved model file: tensile_strength_model.pkl
-
---------------------------------------------------------------
-Tips
---------------------------------------------------------------
-* Ensure all numeric columns contain valid numerical data (no strings or missing values).
-* You can adjust the target_col variable to predict a different property.
-* Try increasing n_estimators in the Random Forest for higher accuracy (with longer training time).
+## Running the Script
+Run:
+```
+python your_script_name.py
+```
 
