@@ -29,6 +29,7 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
 from sklearn.svm import SVR
 from sklearn.ensemble import RandomForestRegressor
+from tensorflow.keras.layers import Conv1D, Flatten, MaxPooling1D
 import xgboost as xgb
 import joblib
 
@@ -235,10 +236,11 @@ models = {
                                           subsample=0.9, colsample_bytree=0.9, random_state=RANDOM_STATE)
 }
 
-# Optionally add deep learning model if tensorflow present
+
 if tf_available:
     # We'll build the Keras model later inside training loop to ensure reproducibility
     models["DeepNN"] = "Keras_MLP_placeholder"
+    models["CNN"] = "Keras_CNN_placeholder"
 
 # ----------------------------
 # 7. Train, evaluate and cross-validate
@@ -268,7 +270,7 @@ def evaluate_and_store(name, model_obj, Xtr, Xte, ytr, yte):
 
 # Train classical models
 for name, obj in list(models.items()):
-    if name == "DeepNN":
+    if name in ["DeepNN", "CNN"]:
         continue
     print(f"\nTraining {name} ...")
     mae, rmse, r2 = evaluate_and_store(name, obj, X_train, X_test, y_train, y_test)
@@ -278,7 +280,7 @@ for name, obj in list(models.items()):
         best_model = obj
         best_name = name
 
-# Train Deep NN if available
+# Train Deep NN
 nn_history = None
 if tf_available:
     print("\nTraining Deep Neural Network (MLP) ...")
@@ -310,6 +312,52 @@ if tf_available:
         best_score = r2_nn
         best_model = model
         best_name = "DeepNN"
+
+
+# Train Convolutional Neural Network (1D CNN)
+cnn_history = None
+if tf_available:
+    print("\nTraining Convolutional Neural Network (1D CNN) ...")
+
+    # reshape input for CNN: (samples, features, 1)
+    X_train_cnn = np.expand_dims(X_train, axis=2)
+    X_test_cnn = np.expand_dims(X_test, axis=2)
+
+    tf.random.set_seed(RANDOM_STATE)
+    n_features = X_train.shape[1]
+
+    cnn_model = Sequential([
+        Conv1D(filters=32, kernel_size=3, activation="relu", input_shape=(n_features, 1)),
+        MaxPooling1D(pool_size=2),
+        Flatten(),
+        Dense(64, activation="relu"),
+        Dropout(0.2),
+        Dense(1, activation="linear")
+    ])
+    cnn_model.compile(optimizer="adam", loss="mse", metrics=["mae"])
+
+    es_cnn = EarlyStopping(monitor="val_loss", patience=10, restore_best_weights=True)
+    cnn_history = cnn_model.fit(
+        X_train_cnn, y_train,
+        validation_split=0.1,
+        epochs=200,
+        batch_size=32,
+        callbacks=[es_cnn],
+        verbose=0
+    )
+
+    preds_cnn = cnn_model.predict(X_test_cnn).ravel()
+    mae_cnn = mean_absolute_error(y_test, preds_cnn)
+    rmse_cnn = np.sqrt(mean_squared_error(y_test, preds_cnn))
+    r2_cnn = r2_score(y_test, preds_cnn)
+
+    print(f"CNN -> MAE: {mae_cnn:.3f}, RMSE: {rmse_cnn:.3f}, R2: {r2_cnn:.3f}")
+    results.append(["CNN", mae_cnn, rmse_cnn, r2_cnn, None, None])
+
+    if r2_cnn > best_score:
+        best_score = r2_cnn
+        best_model = cnn_model
+        best_name = "CNN"
 
 # ----------------------------
 # 8. Results summary
@@ -354,6 +402,16 @@ if nn_history is not None:
     plt.plot(nn_history.history["val_loss"], label="val_loss")
     plt.legend()
     plt.title("NN training and validation loss")
+    plt.tight_layout()
+    plt.show()
+
+# CNN training history plot
+if cnn_history is not None:
+    plt.figure(figsize=(8,4))
+    plt.plot(cnn_history.history["loss"], label="train_loss")
+    plt.plot(cnn_history.history["val_loss"], label="val_loss")
+    plt.legend()
+    plt.title("CNN training and validation loss")
     plt.tight_layout()
     plt.show()
 
