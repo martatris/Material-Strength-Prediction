@@ -62,6 +62,7 @@ Advanced feature engineering was performed, including nonlinear interaction term
 |--------------------------|-----------|------------|----------|----------|
 | Linear Regression         | 364.971    | 464.153     | 0.007    | -0.010359 |
 | Support Vector Regressor  | 365.798    | 466.705     | -0.004   | -0.007211 |
+| CNN                       | 368.479    | 471.267     | -0.002   | NaN       |
 | Random Forest Regressor   | 370.842    | 471.913     | -0.027   | -0.052908 |
 | XGBoost Regressor         | 400.740    | 506.494     | -0.182   | -0.179062 |
 | Deep Neural Network (MLP) | 530.818    | 715.990     | -1.363   | NaN       |
