@@ -49,7 +49,7 @@ pip install pandas numpy scikit-learn xgboost matplotlib seaborn joblib openpyxl
 ## Running the Script
 Run:
 ```
-python your_script_name.py
+python Plastics.py
 ```
 
 ## Results Summary
